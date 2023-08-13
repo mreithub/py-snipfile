@@ -26,11 +26,11 @@ class Slice(FileBase):
         self.pos = pos + len(rc)
         return rc
     
-    def seek(self, offset:int, whence:int=os.SEEK_SET, emptyTail:bool=True) -> int:
+    def seek(self, offset:int, whence:int=os.SEEK_SET) -> int:
         raise Exception("implement me")
 
 
-def _split(f: FileIntf, delimiter: bytes, *, bytesBefore:int=0, bytesAfter:int=0) -> typing.Generator[Slice,None,None]:
+def _split(f: FileIntf, delimiter: bytes, *, bytesBefore:int=0, bytesAfter:int=0, emptyTail:bool=True) -> typing.Generator[Slice,None,None]:
     if not delimiter: raise ValueError("split(): delimiter has to be nonempty")
     if len(delimiter) > CHUNK_SIZE/2: raise ValueError('delimiter too long')
     data = b''
@@ -56,13 +56,14 @@ def _split(f: FileIntf, delimiter: bytes, *, bytesBefore:int=0, bytesAfter:int=0
         yield Slice(f, offset=sliceStart-bytesBefore, size=sliceLen+bytesBefore+bytesAfter)
         dataOffset += idx+len(delimiter)
         sliceStart = dataOffset
-    # there's data left after the last delimiter
-    yield Slice(f, offset=sliceStart-bytesBefore)
+    if emptyTail or f.size != sliceStart-bytesBefore:
+        # there's data left after the last delimiter
+        yield Slice(f, offset=sliceStart-bytesBefore)
 
 def split(f:FileIntf, delimiter:bytes):
     return _split(f, delimiter)
     
 def splitAfter(f:FileIntf, delimiter:bytes):
-    return _split(f, delimiter, bytesAfter=len(delimiter))
+    return _split(f, delimiter, bytesAfter=len(delimiter), emptyTail=False)
 def splitBefore(f:FileIntf, delimiter:bytes):
     return _split(f, delimiter, bytesBefore=len(delimiter))
