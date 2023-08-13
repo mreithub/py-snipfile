@@ -9,7 +9,7 @@ if hasattr(typing, 'Protocol'):
         def seek(self, offset:int, whence:int=os.SEEK_SET) -> int: ...
         def tell(self) -> int: ...
 
-class FileBase(abc.ABC):
+class Filelike(abc.ABC):
     def __init__(self, *, moduleName:str) -> None:
         self.moduleName = moduleName
 

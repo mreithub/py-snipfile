@@ -3,7 +3,7 @@ import os
 import typing
 from . import _base
 
-class JoinedFiles(_base.FileBase):
+class JoinedFiles(_base.Filelike):
     def __init__(self, parts:'typing.List[_base.FileIntf]'):
         super().__init__(moduleName='join')
         self.parts = parts

@@ -1,11 +1,10 @@
-from io import SEEK_END
 import io
 import os
 import typing
 
-from ._base import FileBase
+from ._base import Filelike
 
-class File(FileBase):
+class File(Filelike):
     " wraps filelike objects "
     def __init__(self, fileobj:typing.Union[typing.BinaryIO, str]):
         super().__init__(moduleName='file')

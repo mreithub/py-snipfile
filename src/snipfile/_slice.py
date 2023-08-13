@@ -3,9 +3,9 @@ import typing
 
 CHUNK_SIZE=8192
 
-from ._base import FileBase, FileIntf
+from ._base import FileIntf, Filelike
 
-class Slice(FileBase):
+class Slice(Filelike):
     """ represents a smaller slice of another fileobj, only giving access to the given section """
     def __init__(self, f: 'FileIntf', *, offset:int=0, size:typing.Optional[int]=None):
         if size is None: size = f.size
