@@ -60,6 +60,16 @@ def _split(f: FileIntf, delimiter: bytes, *, bytesBefore:int=0, bytesAfter:int=0
         # there's data left after the last delimiter
         yield Slice(f, offset=sliceStart-bytesBefore)
 
+def cutAt(f:FileIntf, *positions:int) -> typing.List[Slice]:
+    rc:typing.List[Slice] = []
+    lastCut = 0
+    for cut in positions:
+        rc.append(Slice(f, offset=lastCut, size=cut-lastCut))
+        lastCut = cut
+    rc.append(Slice(f, offset=lastCut))
+    return rc
+
+
 def split(f:FileIntf, delimiter:bytes):
     return _split(f, delimiter)
     

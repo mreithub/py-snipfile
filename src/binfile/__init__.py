@@ -1,3 +1,3 @@
 
 from .file import File
-from .slice import Slice, split, splitBefore, splitAfter
+from .slice import Slice, cutAt, split, splitBefore, splitAfter
