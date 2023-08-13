@@ -1,6 +1,20 @@
 import io
+import os
 
 import binfile
+
+def test_seek():
+    slice = binfile.Slice(binfile.fromBytes(b'hello, my dear world'), offset=7, size=7) # "my dear"
+    assert slice.read() == b'my dear'
+    assert slice.read() == b''
+
+    slice.seek(0, os.SEEK_SET)
+    assert slice.read(2) == b'my'
+    assert slice.read(1) == b' '
+    assert slice.read(6) == b'dear'
+
+    slice.seek(-99, os.SEEK_SET)
+    #assert slice.tell() == 0 # TODO
 
 def test_split():
     data = b'a;b'

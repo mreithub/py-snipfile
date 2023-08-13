@@ -22,12 +22,23 @@ class Slice(FileBase):
         realpos = self.f.seek(self.offset + self.pos, os.SEEK_SET)
         pos = realpos - self.offset
         if n < 0: n = self.size-pos
+        if pos+n > self.size: n = self.size-pos
         rc = self.f.read(n)
         self.pos = pos + len(rc)
         return rc
     
     def seek(self, offset:int, whence:int=os.SEEK_SET) -> int:
-        raise Exception("implement me")
+        if whence == os.SEEK_SET:
+            self.pos = offset
+        elif whence == os.SEEK_CUR:
+            self.pos += offset
+        elif whence == os.SEEK_END:
+            self.pos = self.size - offset
+        else: raise ValueError(f'seek(): invalid whence: {repr(whence)}')
+
+        if self.pos < 0: self.pos = 0
+        if self.pos > self.size: self.pos = self.size
+        return self.pos
 
 
 def _split(f: FileIntf, delimiter: bytes, *, bytesBefore:int=0, bytesAfter:int=0, emptyTail:bool=True) -> typing.Generator[Slice,None,None]:
