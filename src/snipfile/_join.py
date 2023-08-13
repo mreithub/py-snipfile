@@ -1,36 +1,36 @@
 
 import os
 import typing
-from . import _base
+from ._base import Filelike
 
-class JoinedFiles(_base.Filelike):
-    def __init__(self, parts:'typing.List[_base.FileIntf]'):
+class JoinedFiles(Filelike):
+    def __init__(self, parts:'typing.List[Filelike]'):
         super().__init__(moduleName='join')
         self.parts = parts
-        self.pos:int = 0
-        self.size:int = sum(part.size for part in parts)
-        self.offsets:typing.List[int] = []
+        self._pos:int = 0
+        self._size:int = sum(part.size() for part in parts)
+        self._offsets:typing.List[int] = []
         self._currentIndex = 0
         offset = 0
         for part in parts:
-            self.offsets.append(offset)
-            offset += part.size
+            self._offsets.append(offset)
+            offset += part.size()
 
     def _getRelativeOffset(self, offset:int):
-        startOfPart = self.offsets[self._currentIndex]
+        startOfPart = self._offsets[self._currentIndex]
         return offset - startOfPart
 
     def __repr__(self) -> str:
         return f"JoinedFiles({', '.join([repr(part) for part in self.parts])})"
     def read(self, n: int = -1) -> bytes:
-        if n < 0: n = self.size - self.pos
+        if n < 0: n = self._size - self._pos
         if n <= 0: return b''
 
         rc = b''
         idx = self._currentIndex
         while idx < len(self.parts):
             f = self.parts[idx]
-            f.seek(self._getRelativeOffset(self.pos))
+            f.seek(self._getRelativeOffset(self._pos))
             data = f.read(n - len(rc))
             if not data: break
             rc += data
@@ -39,26 +39,27 @@ class JoinedFiles(_base.Filelike):
 
     def seek(self, offset: int, whence: int = os.SEEK_SET) -> int:
         if whence == os.SEEK_SET:
-            self.pos = offset
+            self._pos = offset
         elif whence == os.SEEK_CUR:
-            self.pos += offset
+            self._pos += offset
         elif whence == os.SEEK_END:
-            self.pos = self.size - offset
+            self._pos = self._size - offset
         else: raise ValueError(f"seek(): unsupported whence param: {whence}")
 
-        if self.pos < 0: self.pos = 0
-        if self.pos > self.size: self.pos = self.size
+        if self._pos < 0: self._pos = 0
+        if self._pos > self._size: self._pos = self._size
 
         # find the part that matches our position
         idx = 0
-        for i, offset in enumerate(self.offsets):
-            if self.pos < offset: break
+        for i, offset in enumerate(self._offsets):
+            if self._pos < offset: break
             idx = i
         self._currentIndex = idx
 
-        return self.pos
+        return self._pos
  
-    def tell(self) -> int: return self.pos
+    def size(self) -> int: return self._size
+    def tell(self) -> int: return self._pos
 
-def join(*parts: '_base.FileIntf'):
+def join(*parts: Filelike):
     return JoinedFiles(list(parts))

@@ -7,47 +7,48 @@ from ._base import FileIntf, Filelike
 
 class Slice(Filelike):
     """ represents a smaller slice of another fileobj, only giving access to the given section """
-    def __init__(self, f: 'FileIntf', *, offset:int=0, size:typing.Optional[int]=None):
-        if size is None: size = f.size
+    def __init__(self, f: Filelike, *, offset:int=0, size:typing.Optional[int]=None):
+        if size is None: size = f.size()
         if offset < 0: offset = size + offset # subtract offset from size (offset is negative)
         if offset < 0: offset = 0
 
-        if offset > f.size: offset = f.size
-        if offset + size > f.size: size = f.size - offset
+        if offset > f.size(): offset = f.size()
+        if offset + size > f.size(): size = f.size() - offset
 
         self.f = f
         self.offset = offset # start of our 'window' into the file (which is of size `size`)
-        self.pos = 0 # position we're reading right now
-        self.size = size
+        self._pos = 0 # position we're reading right now
+        self._size = size
 
     def __repr__(self) -> str:
         return f"Slice(offset={self.offset}, size={self.size}, f={repr(self.f)})"
 
     def read(self, n:int=-1) -> bytes:
-        realpos = self.f.seek(self.offset + self.pos, os.SEEK_SET)
+        realpos = self.f.seek(self.offset + self._pos, os.SEEK_SET)
         pos = realpos - self.offset
-        if n < 0: n = self.size-pos
-        if pos+n > self.size: n = self.size-pos
+        if n < 0: n = self._size-pos
+        if pos+n > self._size: n = self._size-pos
         rc = self.f.read(n)
-        self.pos = pos + len(rc)
+        self._pos = pos + len(rc)
         return rc
     
     def seek(self, offset:int, whence:int=os.SEEK_SET) -> int:
         if whence == os.SEEK_SET:
-            self.pos = offset
+            self._pos = offset
         elif whence == os.SEEK_CUR:
-            self.pos += offset
+            self._pos += offset
         elif whence == os.SEEK_END:
-            self.pos = self.size - offset
+            self._pos = self.size() - offset
         else: raise ValueError(f'seek(): invalid whence: {repr(whence)}')
 
-        if self.pos < 0: self.pos = 0
-        if self.pos > self.size: self.pos = self.size
-        return self.pos
+        if self._pos < 0: self._pos = 0
+        if self._pos > self.size(): self._pos = self.size()
+        return self._pos
 
-    def tell(self) -> int: return self.pos
+    def size(self) -> int: return self._size
+    def tell(self) -> int: return self._pos
 
-def _split(f: FileIntf, delimiter: bytes, *, bytesBefore:int=0, bytesAfter:int=0, emptyTail:bool=True) -> typing.Generator[Slice,None,None]:
+def _split(f: Filelike, delimiter: bytes, *, bytesBefore:int=0, bytesAfter:int=0, emptyTail:bool=True) -> typing.Generator[Slice,None,None]:
     if not delimiter: raise ValueError("split(): delimiter has to be nonempty")
     if len(delimiter) > CHUNK_SIZE/2: raise ValueError('delimiter too long')
     data = b''
@@ -77,7 +78,7 @@ def _split(f: FileIntf, delimiter: bytes, *, bytesBefore:int=0, bytesAfter:int=0
         # there's data left after the last delimiter
         yield Slice(f, offset=sliceStart-bytesBefore)
 
-def cutAt(f:FileIntf, *positions:int) -> typing.List[Slice]:
+def cutAt(f:Filelike, *positions:int) -> typing.List[Slice]:
     rc:typing.List[Slice] = []
     lastCut = 0
     for cut in positions:
@@ -87,10 +88,10 @@ def cutAt(f:FileIntf, *positions:int) -> typing.List[Slice]:
     return rc
 
 
-def split(f:FileIntf, delimiter:bytes):
+def split(f:Filelike, delimiter:bytes):
     return _split(f, delimiter)
     
-def splitAfter(f:FileIntf, delimiter:bytes):
+def splitAfter(f:Filelike, delimiter:bytes):
     return _split(f, delimiter, bytesAfter=len(delimiter), emptyTail=False)
-def splitBefore(f:FileIntf, delimiter:bytes):
+def splitBefore(f:Filelike, delimiter:bytes):
     return _split(f, delimiter, bytesBefore=len(delimiter))
