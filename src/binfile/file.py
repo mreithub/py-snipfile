@@ -1,3 +1,4 @@
+from io import SEEK_END
 import os
 import typing
 
@@ -10,6 +11,7 @@ class File(FileBase):
         if isinstance(fileobj, str):
             fileobj = open(fileobj, 'rb')
         self.size = fileobj.seek(0, os.SEEK_END)
+        fileobj.seek(0)
         self.f = fileobj
         #self.name = fileobj.name
 

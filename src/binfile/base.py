@@ -4,6 +4,7 @@ import typing
 
 if hasattr(typing, 'Protocol'):
     class FileIntf(typing.Protocol):
+        size:int
         def read(self, n:int=-1) -> bytes: ...
         def seek(self, offset:int, whence:int=os.SEEK_SET) -> int: ...
 
