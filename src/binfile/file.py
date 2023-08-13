@@ -13,6 +13,6 @@ class File(FileBase):
         self.f = fileobj
         #self.name = fileobj.name
 
-    def read(self, n: int) -> bytes: return self.f.read(n)
+    def read(self, n:int=-1) -> bytes: return self.f.read(n)
     def seek(self, offset: int, whence:int=os.SEEK_SET) -> int:
         return self.f.seek(offset, whence)
