@@ -1,4 +1,5 @@
 from io import SEEK_END
+import io
 import os
 import typing
 
@@ -18,3 +19,6 @@ class File(FileBase):
     def read(self, n:int=-1) -> bytes: return self.f.read(n)
     def seek(self, offset: int, whence:int=os.SEEK_SET) -> int:
         return self.f.seek(offset, whence)
+
+def fromBytes(data:bytes) -> File:
+    return File(io.BytesIO(data))
