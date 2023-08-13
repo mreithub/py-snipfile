@@ -14,7 +14,22 @@ def test_seek():
     assert slice.read(6) == b'dear'
 
     slice.seek(-99, os.SEEK_SET)
-    #assert slice.tell() == 0 # TODO
+    assert slice.tell() == 0
+    slice.seek(99, os.SEEK_SET)
+    assert slice.tell() == 7
+
+    slice.seek(-4, os.SEEK_CUR)
+    assert slice.read() == b'dear'
+    slice.seek(-99, os.SEEK_CUR)
+    assert slice.tell() == 0
+
+    slice.seek(0, os.SEEK_END)
+    assert slice.tell() == 7
+    slice.seek(-100, os.SEEK_END)
+    assert slice.tell() == 7
+    slice.seek(4, os.SEEK_END)
+    assert slice.read() == b'dear'
+
 
 def test_split():
     data = b'a;b'
