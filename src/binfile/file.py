@@ -19,6 +19,7 @@ class File(FileBase):
     def read(self, n:int=-1) -> bytes: return self.f.read(n)
     def seek(self, offset: int, whence:int=os.SEEK_SET) -> int:
         return self.f.seek(offset, whence)
+    def tell(self) -> int: return self.f.tell()
 
 def fromBytes(data:bytes) -> File:
     return File(io.BytesIO(data))

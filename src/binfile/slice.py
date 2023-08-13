@@ -40,6 +40,7 @@ class Slice(FileBase):
         if self.pos > self.size: self.pos = self.size
         return self.pos
 
+    def tell(self) -> int: return self.pos
 
 def _split(f: FileIntf, delimiter: bytes, *, bytesBefore:int=0, bytesAfter:int=0, emptyTail:bool=True) -> typing.Generator[Slice,None,None]:
     if not delimiter: raise ValueError("split(): delimiter has to be nonempty")
