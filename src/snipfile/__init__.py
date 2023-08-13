@@ -1,4 +1,4 @@
 
-from .file import File, fromBytes
-from .join import join
-from .slice import Slice, cutAt, split, splitBefore, splitAfter
+from ._file import File, fromBytes
+from ._join import join
+from ._slice import Slice, cutAt, split, splitBefore, splitAfter

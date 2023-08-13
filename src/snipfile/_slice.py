@@ -3,7 +3,7 @@ import typing
 
 CHUNK_SIZE=8192
 
-from .base import FileBase, FileIntf
+from ._base import FileBase, FileIntf
 
 class Slice(FileBase):
     """ represents a smaller slice of another fileobj, only giving access to the given section """

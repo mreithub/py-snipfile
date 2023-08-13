@@ -3,7 +3,7 @@ import io
 import os
 import typing
 
-from .base import FileBase
+from ._base import FileBase
 
 class File(FileBase):
     " wraps filelike objects "

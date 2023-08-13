@@ -1,10 +1,10 @@
 
 import os
 import typing
-from . import base
+from . import _base
 
-class JoinedFiles(base.FileBase):
-    def __init__(self, parts:'typing.List[base.FileIntf]'):
+class JoinedFiles(_base.FileBase):
+    def __init__(self, parts:'typing.List[_base.FileIntf]'):
         super().__init__(moduleName='join')
         self.parts = parts
         self.pos:int = 0
@@ -60,5 +60,5 @@ class JoinedFiles(base.FileBase):
  
     def tell(self) -> int: return self.pos
 
-def join(*parts: 'base.FileIntf'):
+def join(*parts: '_base.FileIntf'):
     return JoinedFiles(list(parts))
