@@ -2,6 +2,15 @@ import os
 
 import snipfile
 
+def test_slice():
+    slice = snipfile.Slice(snipfile.fromBytes(b'hello world'))
+    assert slice.read() == b'hello world'
+
+    slice = snipfile.Slice(snipfile.fromBytes(b'hello world'), offset=-5) # last 5 bytes
+    assert slice.size == 11
+    assert slice.offset == 6
+    assert slice.read() == b'world'
+
 def test_seek():
     slice = snipfile.Slice(snipfile.fromBytes(b'hello, my dear world'), offset=7, size=7) # "my dear"
     assert slice.read() == b'my dear'
@@ -28,6 +37,7 @@ def test_seek():
     assert slice.tell() == 7
     slice.seek(4, os.SEEK_END)
     assert slice.read() == b'dear'
+
 
 
 def test_split():

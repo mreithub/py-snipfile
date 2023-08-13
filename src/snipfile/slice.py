@@ -8,11 +8,14 @@ from .base import FileBase, FileIntf
 class Slice(FileBase):
     """ represents a smaller slice of another fileobj, only giving access to the given section """
     def __init__(self, f: 'FileIntf', *, offset:int=0, size:typing.Optional[int]=None):
+        if size is None:
+            size = f.seek(0, os.SEEK_END)
+        if offset < 0: offset = size + offset # subtract offset from size (offset is negative)
+        if offset < 0: offset = 0
+
         self.f = f
         self.offset = offset # start of our 'window' into the file (which is of size `size`)
         self.pos = 0 # position we're reading right now
-        if size is None:
-            size = self.f.seek(0, os.SEEK_END)
         self.size = size
 
     def __repr__(self) -> str:
