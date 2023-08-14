@@ -4,6 +4,17 @@ import typing
 from ._base import Filelike
 
 class JoinedFiles(Filelike):
+    class _RelativeOffset:
+        def __init__(self, idx:int, offset:int):
+            self.idx = idx
+            self.offset = offset
+
+    class PartInfo:
+        def __init__(self, idx:int, offset:int, size:int):
+            self.idx = idx
+            self.offset = offset
+            self.size = size
+
     def __init__(self, parts:'typing.List[Filelike]'):
         super().__init__(moduleName='join')
         self.parts = parts
@@ -16,12 +27,31 @@ class JoinedFiles(Filelike):
             self._offsets.append(offset)
             offset += part.size()
 
-    def _getRelativeOffset(self, offset:int):
-        startOfPart = self._offsets[self._currentIndex]
-        return offset - startOfPart
+    def _getRelativeOffset(self, offset:int) -> _RelativeOffset:
+        # check current part first
+        idx = self._currentIndex
+        partOffset = self._offsets[idx]
+        partSize = self.parts[idx].size()
+        if offset >= partOffset and offset < partOffset+partSize:
+            return JoinedFiles._RelativeOffset(idx=idx, offset=offset-partOffset)
+
+        # no match -> check other parts
+        for i, partOffset in enumerate(self._offsets):
+            if partOffset > offset: break
+            idx = i
+
+        partOffset = self._offsets[idx]
+        partSize = self.parts[idx].size()
+        return JoinedFiles._RelativeOffset(idx=idx, offset=offset-partOffset)
 
     def __repr__(self) -> str:
         return f"JoinedFiles({', '.join([repr(part) for part in self.parts])})"
+
+    def getPositionInfo(self, pos: int) -> typing.Tuple[str, int]:
+        info = self._getRelativeOffset(pos)
+        part = self.parts[info.idx]
+        return part.getPositionInfo(info.offset)
+
     def read(self, n: int = -1) -> bytes:
         if n < 0: n = self._size - self._pos
         if n <= 0: return b''
@@ -29,8 +59,9 @@ class JoinedFiles(Filelike):
         rc = b''
         idx = self._currentIndex
         while idx < len(self.parts):
-            f = self.parts[idx]
-            f.seek(self._getRelativeOffset(self._pos))
+            info = self._getRelativeOffset(self._pos)
+            f = self.parts[info.idx]
+            f.seek(info.offset)
             data = f.read(n - len(rc))
             if not data: break
             rc += data

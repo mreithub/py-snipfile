@@ -15,6 +15,9 @@ class File(Filelike):
         self.f = fileobj
         #self.name = fileobj.name
 
+    def getPositionInfo(self, pos: int) -> typing.Tuple[str,int]:
+        return self.f.name, pos
+
     def read(self, n:int=-1) -> bytes: return self.f.read(n)
     def seek(self, offset: int, whence:int=os.SEEK_SET) -> int:
         return self.f.seek(offset, whence)

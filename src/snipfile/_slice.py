@@ -23,6 +23,9 @@ class Slice(Filelike):
     def __repr__(self) -> str:
         return f"Slice(offset={self.offset}, size={self.size}, f={repr(self.f)})"
 
+    def getPositionInfo(self, pos: int) -> typing.Tuple[str, int]:
+        return self.f.getPositionInfo(self.offset + pos)
+
     def read(self, n:int=-1) -> bytes:
         realpos = self.f.seek(self.offset + self._pos, os.SEEK_SET)
         pos = realpos - self.offset
