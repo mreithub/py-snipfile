@@ -21,7 +21,7 @@ class Slice(Filelike):
         self._size = size
 
     def __repr__(self) -> str:
-        return f"Slice(offset={self.offset}, size={self.size}, f={repr(self.f)})"
+        return f"Slice(offset={self.offset}, size={self.size()}, f={repr(self.f)})"
 
     def getPositionInfo(self, pos: int) -> typing.Tuple[str, int]:
         return self.f.getPositionInfo(self.offset + pos)

@@ -7,31 +7,31 @@ def test_slice():
     slice = snipfile.Slice(snipfile.fromBytes(b'hello world'))
     assert slice.read() == b'hello world'
     assert slice.offset == 0
-    assert slice.size == 11
+    assert slice.size() == 11
 
     # offset only
     slice = snipfile.Slice(snipfile.fromBytes(b'hello world'), offset=3)
     assert slice.read() == b'lo world'
     assert slice.offset == 3
-    assert slice.size == 8
+    assert slice.size() == 8
 
     # size only
     slice = snipfile.Slice(snipfile.fromBytes(b'hello world'), size=4)
     assert slice.read() == b'hell'
     assert slice.offset == 0
-    assert slice.size == 4
+    assert slice.size() == 4
 
     # both
     slice = snipfile.Slice(snipfile.fromBytes(b'hello world'), offset=3, size=5)
     assert slice.read() == b'lo wo'
     assert slice.offset == 3
-    assert slice.size == 5
+    assert slice.size() == 5
 
     # negative offset (i.e. last 5 bytes of the file)
     slice = snipfile.Slice(snipfile.fromBytes(b'hello world'), offset=-5)
     assert slice.read() == b'world'
     assert slice.offset == 6
-    assert slice.size == 5
+    assert slice.size() == 5
 
 def test_seek():
     slice = snipfile.Slice(snipfile.fromBytes(b'hello, my dear world'), offset=7, size=7) # "my dear"
@@ -96,7 +96,7 @@ def test_split_long_delimiter():
 def test_splitAfter():
     data = b'hello\nworld\n'
     parts = [slice.read() for slice in snipfile.splitAfter(snipfile.fromBytes(data), b'\n')]
-    assert parts == [b'hello\n', b'world\n'] # TODO I think the last item should be omitted for splitAfter() - 
+    assert parts == [b'hello\n', b'world\n']
 
 #def test_splitBefore():
 #    assert False, "todo"
