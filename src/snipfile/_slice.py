@@ -77,7 +77,7 @@ def _split(f: Filelike, delimiter: bytes, *, bytesBefore:int=0, bytesAfter:int=0
         yield Slice(f, offset=sliceStart-bytesBefore, size=sliceLen+bytesBefore+bytesAfter)
         dataOffset += idx+len(delimiter)
         sliceStart = dataOffset
-    if emptyTail or f.size != sliceStart-bytesBefore:
+    if emptyTail or f.size() != sliceStart-bytesBefore:
         # there's data left after the last delimiter
         yield Slice(f, offset=sliceStart-bytesBefore)
 
@@ -85,6 +85,9 @@ def cutAt(f:Filelike, *positions:int) -> typing.List[Slice]:
     rc:typing.List[Slice] = []
     lastCut = 0
     for cut in positions:
+        if cut < 0: # relative to the end of the file
+            cut = f.size() + cut
+        if cut < lastCut: raise ValueError(f"cuts are not in order")
         rc.append(Slice(f, offset=lastCut, size=cut-lastCut))
         lastCut = cut
     rc.append(Slice(f, offset=lastCut))

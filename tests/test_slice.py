@@ -100,3 +100,11 @@ def test_splitAfter():
 
 #def test_splitBefore():
 #    assert False, "todo"
+
+def test_cut():
+    data = b'hello world'
+    parts = [slice.read() for slice in snipfile.cutAt(snipfile.fromBytes(data), 2,5,6)]
+    assert parts == [b'he', b'llo', b' ', b'world']
+
+    parts = [slice.read() for slice in snipfile.cutAt(snipfile.fromBytes(data), 2,-2)]
+    assert parts == [b'he', b'llo wor', b'ld']
