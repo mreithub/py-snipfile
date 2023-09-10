@@ -12,6 +12,7 @@ if hasattr(typing, 'Protocol'):
         def tell(self) -> int: ...
 
 class Filelike(abc.ABC):
+    " base class for all our file classes"
     def __init__(self, *, moduleName:str) -> None:
         self.moduleName = moduleName
 
@@ -29,3 +30,11 @@ class Filelike(abc.ABC):
 
     @abc.abstractmethod
     def tell(self) -> int: ...
+
+    def writeTo(self, target:typing.BinaryIO):
+        " writes the whole contents of this file or slice to target "
+        self.seek(0)
+        while True:
+            data = self.read(8192)
+            if not data: break
+            target.write(data)
