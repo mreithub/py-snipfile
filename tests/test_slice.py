@@ -98,9 +98,6 @@ def test_splitAfter():
     parts = [slice.read() for slice in snipfile.splitAfter(snipfile.fromBytes(data), b'\n')]
     assert parts == [b'hello\n', b'world\n']
 
-#def test_splitBefore():
-#    assert False, "todo"
-
 def test_cut():
     data = b'hello world'
     parts = [slice.read() for slice in snipfile.cutAt(snipfile.fromBytes(data), 2,5,6)]
@@ -108,3 +105,19 @@ def test_cut():
 
     parts = [slice.read() for slice in snipfile.cutAt(snipfile.fromBytes(data), 2,-2)]
     assert parts == [b'he', b'llo wor', b'ld']
+
+    # we expect to get empty slices in stead of (omitting empty sections)
+    parts = [slice.read() for slice in snipfile.cutAt(snipfile.fromBytes(data), 6, 10)]
+    assert parts == [b'hello ', b'worl', b'd']
+    parts = [slice.read() for slice in snipfile.cutAt(snipfile.fromBytes(data), 6, 11)]
+    assert parts == [b'hello ', b'world', b'']
+    parts = [slice.read() for slice in snipfile.cutAt(snipfile.fromBytes(data), 6, 6, 11)]
+    assert parts == [b'hello ', b'', b'world', b'']
+
+    # providing cuts in the wrong order leads to an Exception
+    try:
+        parts = [slice.read() for slice in snipfile.cutAt(snipfile.fromBytes(data), 8,6,4,2)]
+        assert False, "we expect the code to raise a ValueError if the user provides cut points in the wrong order"
+    except ValueError:
+        pass
+

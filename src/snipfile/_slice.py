@@ -51,19 +51,19 @@ class Slice(Filelike):
     def size(self) -> int: return self._size
     def tell(self) -> int: return self._pos
 
-def _split(f: Filelike, delimiter: bytes, *, bytesBefore:int=0, bytesAfter:int=0, emptyTail:bool=True) -> typing.Generator[Slice,None,None]:
+def _split(f: Filelike, delimiter: bytes, *, bytesAfter:int=0, emptyTail:bool=True) -> typing.Generator[Slice,None,None]:
     if not delimiter: raise ValueError("split(): delimiter has to be nonempty")
     if len(delimiter) > CHUNK_SIZE/2: raise ValueError('delimiter too long')
     data = b''
     dataOffset = 0
-    oldOffset = -1 # if this is
+    oldOffset = -1 # if the offset doesn't change between iterations, we'll abort
     sliceStart = 0
     while True:
         if dataOffset == oldOffset: break
         f.seek(dataOffset, os.SEEK_SET)
         oldOffset = dataOffset
 
-        data = f.read(8192)
+        data = f.read(CHUNK_SIZE)
         if not data: break
         try:
             idx = data.index(delimiter)
@@ -74,14 +74,25 @@ def _split(f: Filelike, delimiter: bytes, *, bytesBefore:int=0, bytesAfter:int=0
             continue # not found
 
         sliceLen = idx
-        yield Slice(f, offset=sliceStart-bytesBefore, size=sliceLen+bytesBefore+bytesAfter)
+        yield Slice(f, offset=sliceStart, size=sliceLen+bytesAfter)
         dataOffset += idx+len(delimiter)
         sliceStart = dataOffset
-    if emptyTail or f.size() != sliceStart-bytesBefore:
+    if emptyTail or f.size() != sliceStart:
         # there's data left after the last delimiter
-        yield Slice(f, offset=sliceStart-bytesBefore)
+        yield Slice(f, offset=sliceStart)
 
 def cutAt(f:Filelike, *positions:int) -> typing.List[Slice]:
+    """ cuts a file into Slices at the given positions, e.g.:
+cut(fromBytes(b"hello you", 4,6)) returns a list of Slices, one for b'hell', one for b'o ' and one for b'you'
+
+use it e.g. as:
+
+```
+hell, o, you = cut(fromBytes(b"hello you"), 4,6)
+```
+
+- will always try to return len(positions)+1 slices
+- raises ValueError if the cut positions aren't in ascending order """
     rc:typing.List[Slice] = []
     lastCut = 0
     for cut in positions:
@@ -99,5 +110,3 @@ def split(f:Filelike, delimiter:bytes):
     
 def splitAfter(f:Filelike, delimiter:bytes):
     return _split(f, delimiter, bytesAfter=len(delimiter), emptyTail=False)
-def splitBefore(f:Filelike, delimiter:bytes):
-    return _split(f, delimiter, bytesBefore=len(delimiter))
