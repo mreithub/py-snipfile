@@ -57,15 +57,16 @@ class JoinedFiles(Filelike):
         if n <= 0: return b''
 
         rc = b''
-        idx = self._currentIndex
-        while idx < len(self.parts):
-            info = self._getRelativeOffset(self._pos)
+        info = self._getRelativeOffset(self._pos)
+        while True:
             f = self.parts[info.idx]
             f.seek(info.offset)
             data = f.read(n - len(rc))
             if not data: break
             rc += data
-            idx += 1
+            self._pos += len(data)
+            info = self._getRelativeOffset(self._pos)
+            self._currentIndex = info.idx
         return rc
 
     def seek(self, offset: int, whence: int = os.SEEK_SET) -> int:
@@ -93,4 +94,5 @@ class JoinedFiles(Filelike):
     def tell(self) -> int: return self._pos
 
 def join(*parts: Filelike):
+    " combines filelike objects into a seamless whole, i.e. read() calls should not stop at part boundaries "
     return JoinedFiles(list(parts))
