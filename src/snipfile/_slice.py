@@ -41,7 +41,7 @@ class Slice(Filelike):
         elif whence == os.SEEK_CUR:
             self._pos += offset
         elif whence == os.SEEK_END:
-            self._pos = self.size() - offset
+            self._pos = self.size() + offset
         else: raise ValueError(f'seek(): invalid whence: {repr(whence)}')
 
         if self._pos < 0: self._pos = 0

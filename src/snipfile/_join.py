@@ -75,7 +75,7 @@ class JoinedFiles(Filelike):
         elif whence == os.SEEK_CUR:
             self._pos += offset
         elif whence == os.SEEK_END:
-            self._pos = self._size - offset
+            self._pos = self._size + offset
         else: raise ValueError(f"seek(): unsupported whence param: {whence}")
 
         if self._pos < 0: self._pos = 0

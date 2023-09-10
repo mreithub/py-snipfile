@@ -55,9 +55,9 @@ def test_seek():
 
     slice.seek(0, os.SEEK_END)
     assert slice.tell() == 7
-    slice.seek(-100, os.SEEK_END)
-    assert slice.tell() == 7
     slice.seek(4, os.SEEK_END)
+    assert slice.tell() == 7
+    slice.seek(-4, os.SEEK_END)
     assert slice.read() == b'dear'
 
 
