@@ -5,7 +5,7 @@ import typing
 from ._base import Filelike
 
 class File(Filelike):
-    " wraps filelike objects "
+    " thin wrapper around python file-like objects "
     def __init__(self, fileobj:typing.Union[typing.BinaryIO, str]):
         super().__init__(moduleName='file')
         if isinstance(fileobj, str):
@@ -25,4 +25,5 @@ class File(Filelike):
     def tell(self) -> int: return self.f.tell()
 
 def fromBytes(data:bytes) -> File:
+    " syntactic sugar for `File(io.BytesIO(data))` "
     return File(io.BytesIO(data))

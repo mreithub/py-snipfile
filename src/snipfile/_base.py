@@ -17,13 +17,20 @@ class Filelike(abc.ABC):
         self.moduleName = moduleName
 
     @abc.abstractmethod
-    def getPositionInfo(self, pos:int) -> typing.Tuple[str,int]: ...
+    def getPositionInfo(self, pos:int) -> typing.Tuple[str,int]:
+        """ translates pos into the path and absolute position in the underlying file; can be used to provide valuable position info to the user """
 
     @abc.abstractmethod
     def read(self, n:int=-1) -> bytes: ...
 
     @abc.abstractmethod
-    def seek(self, offset:int, whence:int=os.SEEK_SET) -> int: ...
+    def seek(self, offset:int, whence:int=os.SEEK_SET) -> int:
+        """ seek() to the given position, relative to `whence`, e.g.:
+- seek(n) behaves like seek(0, os.SEEK_SET)
+- seek(n, os.SEEK_SET) moves the file cursor to position 100"
+- seek(n, os.SEEK_CUR) moves the file cursor to tell()+n
+- seek(n, os.SEEK_END) moves the file cursor to size()+n
+"""
 
     @abc.abstractmethod
     def size(self) -> int: ...
