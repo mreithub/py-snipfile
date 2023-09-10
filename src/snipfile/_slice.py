@@ -83,12 +83,13 @@ def _split(f: Filelike, delimiter: bytes, *, bytesAfter:int=0, emptyTail:bool=Tr
 
 def cutAt(f:Filelike, *positions:int) -> typing.List[Slice]:
     """ cuts a file into Slices at the given positions, e.g.:
-cut(fromBytes(b"hello you", 4,6)) returns a list of Slices, one for b'hell', one for b'o ' and one for b'you'
+cutAt(fromBytes(b"hello you", 4,6)) returns a list of Slices, one for b'hell', one for b'o ' and one for b'you'
 
 use it e.g. as:
 
 ```
-hell, o, you = cut(fromBytes(b"hello you"), 4,6)
+twoParts = cutAt(f, 32) # cut at position 32, returning a list of Slices
+hell, o_, you = cutAt(fromBytes(b"hello_you"), 4,6)
 ```
 
 - will always try to return len(positions)+1 slices
