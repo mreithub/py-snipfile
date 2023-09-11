@@ -1,9 +1,9 @@
 [project]
 name = "snipfile"
-version = "0.0.1"
-description = "provides functions to cut and merge files in python"
+version = "0.1.0"
+description = "provides functions to cut and merge file-objects in python"
 readme = "README.md"
-requires-python = ">= 3.7"
+requires-python = ">= 3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
