@@ -3,7 +3,7 @@ import os
 import typing
 
 class PositionInfo:
-    def __init__(self, file: 'Filelike', name: str, pos:int):
+    def __init__(self, file: 'Filelike', name: typing.Optional[str], pos:int):
         self.file = file
         self.name = name
         self.pos = pos

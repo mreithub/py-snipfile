@@ -27,7 +27,9 @@ class File(Filelike):
         #self.name = fileobj.name
 
     def getPositionInfo(self, pos: int) -> PositionInfo:
-        return PositionInfo(file=self, name=self.f.name, pos=pos)
+        name:typing.Optional[str] = None
+        if hasattr(self.f, 'name'): name = getattr(self.f, 'name')
+        return PositionInfo(file=self, name=name, pos=pos)
 
     def read(self, n:int=-1) -> bytes: return self.f.read(n)
     def seek(self, offset: int, whence:int=os.SEEK_SET) -> int:
