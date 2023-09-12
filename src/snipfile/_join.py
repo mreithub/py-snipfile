@@ -1,7 +1,7 @@
 
 import os
 import typing
-from ._base import Filelike
+from ._base import Filelike, PositionInfo
 
 class JoinedFiles(Filelike):
     class _RelativeOffset:
@@ -47,7 +47,7 @@ class JoinedFiles(Filelike):
     def __repr__(self) -> str:
         return f"JoinedFiles({', '.join([repr(part) for part in self.parts])})"
 
-    def getPositionInfo(self, pos: int) -> typing.Tuple[str, int]:
+    def getPositionInfo(self, pos: int) -> PositionInfo:
         info = self._getRelativeOffset(pos)
         part = self.parts[info.idx]
         return part.getPositionInfo(info.offset)

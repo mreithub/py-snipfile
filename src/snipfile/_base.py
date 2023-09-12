@@ -2,9 +2,16 @@ import abc
 import os
 import typing
 
+class PositionInfo:
+    def __init__(self, file: 'Filelike', name: str, pos:int):
+        self.file = file
+        self.name = name
+        self.pos = pos
+
+
 if hasattr(typing, 'Protocol'):
     class FileIntf(typing.Protocol):
-        def getPositionInfo(self, pos:int): ...
+        def getPositionInfo(self, pos:int) -> PositionInfo: ...
 
         def read(self, n:int=-1) -> bytes: ...
         def seek(self, offset:int, whence:int=os.SEEK_SET) -> int: ...
@@ -17,7 +24,7 @@ class Filelike(abc.ABC):
         self.moduleName = moduleName
 
     @abc.abstractmethod
-    def getPositionInfo(self, pos:int) -> typing.Tuple[str,int]:
+    def getPositionInfo(self, pos:int) -> PositionInfo:
         """ translates pos into the path and absolute position in the underlying file; can be used to provide valuable position info to the user """
 
     @abc.abstractmethod

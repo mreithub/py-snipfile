@@ -3,7 +3,7 @@ import typing
 
 CHUNK_SIZE=8192
 
-from ._base import Filelike
+from ._base import Filelike, PositionInfo
 
 class Slice(Filelike):
     """ represents a smaller slice of another fileobj, only giving access to the given section """
@@ -23,7 +23,7 @@ class Slice(Filelike):
     def __repr__(self) -> str:
         return f"Slice(offset={self.offset}, size={self.size()}, f={repr(self.f)})"
 
-    def getPositionInfo(self, pos: int) -> typing.Tuple[str, int]:
+    def getPositionInfo(self, pos: int) -> PositionInfo:
         return self.f.getPositionInfo(self.offset + pos)
 
     def read(self, n:int=-1) -> bytes:
