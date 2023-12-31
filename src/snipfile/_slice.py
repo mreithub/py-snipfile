@@ -20,6 +20,10 @@ class Slice(Filelike):
         self._pos = 0 # position we're reading right now
         self._size = size
 
+    def __eq__(self, other: 'Slice') -> bool:
+        if not isinstance(other, Slice): return False
+        return self.f == other.f and self.offset == other.offset and self.size() == other.size()
+
     def __repr__(self) -> str:
         return f"Slice(offset={self.offset}, size={self.size()}, f={repr(self.f)})"
 
@@ -111,3 +115,62 @@ def split(f:Filelike, delimiter:bytes):
     
 def splitAfter(f:Filelike, delimiter:bytes):
     return _split(f, delimiter, bytesAfter=len(delimiter), emptyTail=False)
+
+
+def unslice(slices: typing.Sequence[Filelike]) -> typing.List[Filelike]:
+    """ simplifies a list of Slices while preserving their order
+
+- any two or more contiguous slices passed to this function (pointing to the same underlying Filelike) will be combined into a new Slice covering them all
+- if a returned Slice covers the whole underlying Filelike (i.e. Slice.offset=0 and Slice.size() == Slice.f.size()), the underlying Filelike will be returned instead
+
+Examples:
+
+```
+# cutAt() returns all parts of f as Slice objects - unslice() will undo that
+unslice(cutAt(f, 1,2,3,4,5)) == f
+
+# here, we split 'helloworld' into slices of 'hell', 'o' and 'world'.
+# between 'o' and 'world' we add new data and pass the whole thing to unslice()
+# the code below prints b'hello', b' ' and b'world' (i.e. will combine 'hell' and 'o' as they are contiguous)
+hell,o,world = snipfile.cutAt(snipfile.fromBytes(b'helloworld'), 4,5)
+for slice in snipfile.unslice([hell, o, snipfile.Slice(snipfile.fromBytes(b' ')]), world):
+    print(slice.read())
+```
+
+"""
+    firstSlice: typing.Optional[Slice] = None
+    sliceEnd = 0
+
+    def _makeSlice(firstSlice:Slice, sliceEnd:int):
+        " inline helper function that creates a combined Slice to return "
+        rc = Slice(firstSlice.f, offset=firstSlice.offset, size=sliceEnd-firstSlice.offset)
+        if rc.offset == 0 and rc.size() == rc.f.size():
+            return firstSlice.f # slice spans the whole underlying file -> return that instead
+        if sliceEnd is firstSlice.offset+firstSlice.size():
+            return firstSlice # only one Slice -> return as-is
+        return rc
+
+    rc:typing.List[Filelike] = []
+    for slice in slices:
+        if not isinstance(slice, Slice):
+            if firstSlice is not None:
+                rc.append(_makeSlice(firstSlice, sliceEnd))
+                firstSlice = None
+            rc.append(slice)
+            continue
+
+        if firstSlice is None or firstSlice.f is not slice.f or slice.offset != sliceEnd:
+            # not contiguous -> start a new output Slice
+            if firstSlice is not None: # ... and yield the old one if present)
+                rc.append(_makeSlice(firstSlice, sliceEnd))
+
+            firstSlice = slice
+            sliceEnd = slice.offset
+
+        assert sliceEnd == slice.offset
+        sliceEnd += slice.size()
+
+    if firstSlice is not None:
+        rc.append(_makeSlice(firstSlice, sliceEnd))
+
+    return rc

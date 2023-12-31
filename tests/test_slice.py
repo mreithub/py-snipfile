@@ -121,3 +121,30 @@ def test_cut():
     except ValueError:
         pass
 
+
+
+def test_unslice():
+    data = b'hello world'
+    wrappedData = snipfile.fromBytes(data)
+
+    # unwrap(Slice(f)) should simply return f (i.e. Slice spans the whole file)
+    assert snipfile.unslice([snipfile.Slice(wrappedData)]) == [wrappedData]
+
+    # that should also work if the underlying file has been cut into pieces (again, wrappedData is to be returned here
+    result = snipfile.unslice(snipfile.cutAt(wrappedData, 5,6))
+    assert len(result) == 1
+    assert [wrappedData] == result
+    assert result[0] is wrappedData # instance check
+
+    hell, o, _, world = snipfile.cutAt(wrappedData, 4,5,6)
+    result = snipfile.unslice([hell, o, snipfile.fromBytes(b'_'), world])
+
+    assert len(result) == 3
+    assert result[0] == snipfile.Slice(wrappedData, size=5)
+    assert result[0].read() == b'hello'
+    assert not isinstance(result[1], snipfile.Slice) # should return `snipfile.fromBytes(b'_')`, i.e. a File object
+    assert result[1].read() == b'_'
+    assert result[2] is world # instead of creating a new Slice, simply return the existing one
+
+
+    assert [] == snipfile.unslice([])
