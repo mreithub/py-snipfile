@@ -1,6 +1,6 @@
 [project]
 name = "snipfile"
-version = "0.1.1"
+version = "0.2"
 description = "provides functions to cut and merge file-objects in python"
 readme = "README.md"
 requires-python = ">= 3.8"
