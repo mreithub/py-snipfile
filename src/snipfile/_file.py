@@ -2,19 +2,11 @@ import io
 import os
 import typing
 
-from ._base import Filelike, PositionInfo
-
-if hasattr(typing, 'Protocol'):
-    class _PythonFile(typing.Protocol):
-        def read(self, n:int) -> bytes: ...
-        def seek(self, __offset:int, __whence:int=os.SEEK_SET) -> int: ...
-        def tell(self) -> int: ...
-
-
+from ._base import _PyFile, Filelike, PositionInfo
 
 class File(Filelike):
     " thin wrapper around python file-like objects "
-    def __init__(self, fileobj:typing.Union['_PythonFile', str], *, size:typing.Optional[int]=None):
+    def __init__(self, fileobj:typing.Union['_PyFile', str], *, size:typing.Optional[int]=None):
         " wraps a python low-level file like object  "
         super().__init__(moduleName='file')
         if isinstance(fileobj, str):
