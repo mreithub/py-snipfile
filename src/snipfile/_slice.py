@@ -117,7 +117,7 @@ def splitAfter(f:Filelike, delimiter:bytes):
     return _split(f, delimiter, bytesAfter=len(delimiter), emptyTail=False)
 
 
-def unslice(slices: typing.Sequence[Filelike]) -> typing.List[Filelike]:
+def unslice(slices: typing.Iterable[Filelike]) -> typing.List[Filelike]:
     """ simplifies a list of Slices while preserving their order
 
 - any two or more contiguous slices passed to this function (pointing to the same underlying Filelike) will be combined into a new Slice covering them all
